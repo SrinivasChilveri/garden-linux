@@ -4,30 +4,35 @@ import (
 	"runtime"
 	"strconv"
 
+	"strconv"
+
 	"github.com/cloudfoundry-incubator/garden"
+	gclient "github.com/cloudfoundry-incubator/garden/client"
+	"github.com/cloudfoundry-incubator/garden/client/connection"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 const (
-	createDestroys = 0 // e.g. 10
-	createSamples  = 0 // e.g. 5
+	creates       = 20 // e.g. 10
+	createSamples = 1  // e.g. 5
 )
 
-var _ = Describe("Container creation", func() {
+var _ = FDescribe("Container creation", func() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	var (
-		createDestroy   func(i int, b Benchmarker)
-		goCreateDestroy func(i int, b Benchmarker) chan struct{}
+		create   func(i int, b Benchmarker) string
+		goCreate func(i int, b Benchmarker) chan string
 	)
 
 	BeforeEach(func() {
-		client = startGarden()
+		client = gclient.New(connection.New("tcp", "localhost:7777"))
 
-		createDestroy = func(i int, b Benchmarker) {
-			b.Time("total create+destroy", func() {
-				b.Time("create+destroy-"+strconv.Itoa(i), func() {
+		create = func(i int, b Benchmarker) string {
+			var handle string
+			b.Time("total create", func() {
+				b.Time("create-"+strconv.Itoa(i), func() {
 					var ctr garden.Container
 					b.Time("total create", func() {
 						b.Time("create-"+strconv.Itoa(i), func() {
@@ -36,36 +41,32 @@ var _ = Describe("Container creation", func() {
 							Ω(err).ShouldNot(HaveOccurred())
 						})
 					})
-					b.Time("total destroy", func() {
-						b.Time("destroy-"+strconv.Itoa(i), func() {
-							err := client.Destroy(ctr.Handle())
-							Ω(err).ShouldNot(HaveOccurred())
-						})
-					})
+					handle = ctr.Handle()
 				})
 			})
+			return handle
 		}
 
-		goCreateDestroy = func(i int, b Benchmarker) chan struct{} {
-			done := make(chan struct{})
+		goCreate = func(i int, b Benchmarker) chan string {
+			handleChan := make(chan string, 1)
 			go func() {
-				createDestroy(i, b)
-				close(done)
+				defer GinkgoRecover()
+				handleChan <- create(i, b)
 			}()
-			return done
+			return handleChan
 		}
 	})
 
-	Measure("multiple creates and destroys", func(b Benchmarker) {
-		b.Time("create+destroy concurrently "+strconv.Itoa(createDestroys)+" times", func() {
-			chans := make([]chan struct{}, createDestroys)
+	Measure("multiple concurrent creates", func(b Benchmarker) {
+		b.Time("create concurrently "+strconv.Itoa(creates)+" times", func() {
+			chans := make([]chan string, creates)
 
 			for i, _ := range chans {
-				chans[i] = goCreateDestroy(i, b)
+				chans[i] = goCreate(i, b)
 			}
 
 			for i, _ := range chans {
-				Eventually(chans[i], "10s").Should(BeClosed())
+				Ω(client.Destroy(<-chans[i])).Should(Succeed())
 			}
 		})
 	}, createSamples)
