@@ -614,7 +614,7 @@ func (p *LinuxContainerPool) acquireSystemResources(id, handle, containerPath, r
 
 	pRunner := logging.Runner{
 		CommandRunner: p.runner,
-		Logger:        p.logger,
+		Logger:        pLog.Session("create-script"),
 	}
 
 	err = pRunner.Run(create)
