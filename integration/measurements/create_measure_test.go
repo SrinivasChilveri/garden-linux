@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	creates       = 20 // e.g. 10
+	creates       = 10 // e.g. 10
 	createSamples = 1  // e.g. 5
 )
 
