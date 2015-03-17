@@ -8,6 +8,8 @@ import (
 	"path"
 	"time"
 
+	"sync"
+
 	"github.com/cloudfoundry-incubator/garden"
 	"github.com/cloudfoundry-incubator/garden-linux/old/system_info"
 	"github.com/pivotal-golang/lager"
@@ -45,7 +47,8 @@ type ContainerRepository interface {
 }
 
 type LinuxBackend struct {
-	logger lager.Logger
+	logger           lager.Logger
+	startContainerMu sync.Mutex
 
 	containerPool ContainerPool
 	systemInfo    system_info.Provider
@@ -149,15 +152,24 @@ func (b *LinuxBackend) Create(spec garden.ContainerSpec) (garden.Container, erro
 		return nil, err
 	}
 
-	err = container.Start()
-	if err != nil {
-		b.containerPool.Destroy(container)
+	if err := b.startContainer(container); err != nil {
 		return nil, err
 	}
 
 	b.containerRepo.Add(container)
 
 	return container, nil
+}
+
+func (b *LinuxBackend) startContainer(container Container) error {
+	b.startContainerMu.Lock()
+	defer b.startContainerMu.Unlock()
+	err := container.Start()
+	if err != nil {
+		b.containerPool.Destroy(container)
+		return err
+	}
+	return nil
 }
 
 func (b *LinuxBackend) Destroy(handle string) error {
