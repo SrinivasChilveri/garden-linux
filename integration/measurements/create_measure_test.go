@@ -4,8 +4,6 @@ import (
 	"runtime"
 	"strconv"
 
-	"strconv"
-
 	"github.com/cloudfoundry-incubator/garden"
 	gclient "github.com/cloudfoundry-incubator/garden/client"
 	"github.com/cloudfoundry-incubator/garden/client/connection"
