@@ -1,0 +1,49 @@
+Ran 5 samples:
+  create-2:
+    Fastest Time: 0.839s
+    Slowest Time: 3.809s
+    Average Time: 2.102s ± 0.957s
+  total create:
+    Fastest Time: 0.793s
+    Slowest Time: 3.833s
+    Average Time: 2.112s ± 0.887s
+  create-4:
+    Fastest Time: 0.851s
+    Slowest Time: 3.765s
+    Average Time: 2.066s ± 1.139s
+  create-6:
+    Fastest Time: 0.850s
+    Slowest Time: 2.933s
+    Average Time: 1.707s ± 0.789s
+  create-8:
+    Fastest Time: 0.793s
+    Slowest Time: 2.805s
+    Average Time: 1.667s ± 0.754s
+  create-7:
+    Fastest Time: 0.801s
+    Slowest Time: 2.902s
+    Average Time: 1.698s ± 0.765s
+  create-9:
+    Fastest Time: 1.790s
+    Slowest Time: 3.181s
+    Average Time: 2.155s ± 0.520s
+  create-0:
+    Fastest Time: 1.841s
+    Slowest Time: 3.833s
+    Average Time: 2.690s ± 0.722s
+  create-5:
+    Fastest Time: 0.933s
+    Slowest Time: 3.200s
+    Average Time: 2.586s ± 0.834s
+  create-3:
+    Fastest Time: 0.857s
+    Slowest Time: 3.001s
+    Average Time: 2.521s ± 0.832s
+  create-1:
+    Fastest Time: 0.925s
+    Slowest Time: 2.902s
+    Average Time: 1.925s ± 0.630s
+  create concurrently 10 times:
+    Fastest Time: 4.376s
+    Slowest Time: 5.747s
+    Average Time: 4.919s ± 0.455s
